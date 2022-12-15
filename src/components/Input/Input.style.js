@@ -5,7 +5,7 @@ export default StyleSheet.create({
   container: {
     marginBottom: 5,
     marginTop: 5,
-    backgroundColor: Color.DarkGray,
+    backgroundColor: Color.DarkGray2,
     borderRadius: 4,
   },
  

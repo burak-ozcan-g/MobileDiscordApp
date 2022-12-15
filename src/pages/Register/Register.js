@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { SafeAreaView, View, Text } from 'react-native';
 import styles from './Register.style'
 
@@ -8,10 +8,17 @@ import * as yup from 'yup';
 import Input from '../../components/Input'
 import Button from '../../components/Button'
 import TouchText from '../../components/TouchText/TouchText';
+import authErrorMessage from '../../utils/authErrorMessagesParser';
 
 import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage'
+
+import flashMessage from '../../utils/flashMessage';
+
 
 const initialFormValues = {
+  username: '',
   email: '',
   password: '',
   repassword: '',
@@ -22,21 +29,39 @@ const Register = ({ navigation }) => {
 
   async function handleSignUp(formValues) {
     if (formValues.password !== formValues.repassword) {
+      flashMessage('Şifreler Uyuşmuyor', 'warning')
+
+      console.log('şifreler uyuşmuyor')
       return;
     }
     try {
       setLoading(true);
-      await auth()
-        .createUserWithEmailAndPassword(formValues.email, formValues.password)
+      await auth().createUserWithEmailAndPassword(formValues.email, formValues.password)
 
+      await firestore()
+        .collection('Users')
+        .add({
+          username: formValues.username,
+          email: formValues.email,
+          uid: auth().currentUser.uid,
+        }).then(async () => {
+          console.log('User added');
+        })
+      flashMessage('Kullanıcı Başarıyla Oluşturuldu', 'success')
       navigation.navigate('LoginScreen')
       setLoading(false)
+
     } catch (err) {
+      console.log(err)
+      flashMessage(authErrorMessage(err.code), 'warning')
       setLoading(false)
     }
   }
 
   const signUpValidationSchema = yup.object().shape({
+    username: yup
+      .string()
+      .required('Kullanıcı adı gerekli.'),
     email: yup
       .string()
       .email('Lütfen geçerli bir e-posta girin.')
@@ -65,6 +90,14 @@ const Register = ({ navigation }) => {
           onSubmit={handleSignUp}
         >{({ values, handleChange, handleSubmit, errors }) => (
           <>
+            <Text style={styles.header_input}>KULLANICI ADI</Text>
+            <Input
+              value={values.username}
+              onType={handleChange('username')}
+              placeholder={'Kullanıcı adı'} />
+            {errors.username &&
+              <Text style={styles.error}> {errors.username} </Text>
+            }
             <Text style={styles.header_input}>E-POSTA</Text>
             <Input
               value={values.email}
@@ -73,6 +106,7 @@ const Register = ({ navigation }) => {
             {errors.email &&
               <Text style={styles.error}> {errors.email} </Text>
             }
+            <Text style={styles.header_input}>ŞİFRE</Text>
             <Input
               value={values.password}
               onType={handleChange('password')}
@@ -80,10 +114,11 @@ const Register = ({ navigation }) => {
             {errors.password &&
               <Text style={styles.error}> {errors.password} </Text>
             }
+            <Text style={styles.header_input}>ŞİFRE TEKRAR</Text>
             <Input
               value={values.repassword}
               onType={handleChange('repassword')}
-              placeholder={'Şifre Tekrar'} />
+              placeholder={'Şifre tekrar'} />
             {errors.repassword &&
               <Text style={styles.error}> {errors.repassword} </Text>
             }

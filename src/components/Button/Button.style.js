@@ -30,18 +30,18 @@ export default {
     },
     title: {
       ...base_style.title,
-      color: '#FFFFFF',
+      color: Color.TextWhite,
     }
   }),
   secondary: StyleSheet.create({
     ...base_style,
     container: {
       ...base_style.container,
-      backgroundColor: Color.LightGray,
+      backgroundColor: Color.LightGray1,
     },
     title: {
       ...base_style.title,
-      color: '#FFFFFF',
+      color: Color.TextWhite,
     }
   }),
 }

@@ -21,7 +21,7 @@ export default StyleSheet.create({
   text: {
     fontFamily: 'Uni Sans Regular',
     margin: 5,
-    color: '#B1B2B7'
+    color: Color.TextGray,
   },
   input_container: {
     marginLeft: 15,

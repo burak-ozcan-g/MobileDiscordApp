@@ -1,5 +1,6 @@
 import React from "react";
 import { SafeAreaView, TextInput } from "react-native";
+import Color from "../../utils/Color";
 
 import styles from './Input.style'
 
@@ -12,7 +13,7 @@ const Input = ({ placeholder, value, onType, isSecure=false }) => {
         onChangeText={onType}
         value={value}
         secureTextEntry={isSecure}
-        placeholderTextColor={'#B1B2B7'}
+        placeholderTextColor={Color.TextGray}
       >
       </TextInput>
     </SafeAreaView>

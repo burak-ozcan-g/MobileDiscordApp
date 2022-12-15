@@ -25,10 +25,11 @@ export default StyleSheet.create({
   header_input: {
     fontFamily: 'Uni Sans Bold',
     fontSize: 12,
+    marginTop: 3,
   },
   error: {
     color: 'red',
     alignSelf: 'center',
-  }
+  },
 
 })

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, Text, View } from "react-native";
 import styles from './Login.style'
 
@@ -10,6 +10,12 @@ import Button from "../../components/Button"
 import TouchText from "../../components/TouchText/TouchText";
 
 import auth from '@react-native-firebase/auth'
+import flashMessage from "../../utils/flashMessage";
+import authErrorMessage from "../../utils/authErrorMessagesParser";
+
+import { Voximplant } from 'react-native-voximplant';
+import { APP_NAME, ACC_NAME } from '../../Constants'
+import firestore from '@react-native-firebase/firestore'
 
 const initialFormValues = {
   email: '',
@@ -17,6 +23,22 @@ const initialFormValues = {
 }
 
 const Login = () => {
+  const voximplant = Voximplant.getInstance();
+
+  useEffect(() => {
+    const connect = async () => {
+      const status = await voximplant.getClientState();
+      console.log(status)
+      if (status === Voximplant.ClientState.DISCONNECTED) {
+        await voximplant.connect();
+      } else if (status === Voximplant.ClientState.LOGGED_IN) {
+        console.log('logged-in')
+      }
+    }
+
+    connect();
+  }, [])
+
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(formValues) {
@@ -25,10 +47,21 @@ const Login = () => {
       await auth()
         .signInWithEmailAndPassword(formValues.email, formValues.password)
 
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
+      let username = '';
+      await firestore().collection('Users').where('email', '==', formValues.email).get().then(userQS => {
+        userQS.forEach(async userDS => {
+          username = userDS.get('username')
+          const fqUsername = `${username}@${APP_NAME}.${ACC_NAME}.voximplant.com`
+          await voximplant.login(fqUsername, formValues.password)
+        })
+      })
 
+      flashMessage('Başarıyla Giriş Yapıldı', 'success')
+      setLoading(false);
+    } catch (err) {
+      flashMessage(authErrorMessage(err.code), 'warning')
+      console.log('login denied')
+      setLoading(false);
     }
   }
 
